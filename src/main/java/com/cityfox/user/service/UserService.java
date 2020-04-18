@@ -47,7 +47,7 @@ public class UserService {
     Role userRole = roleRepository.findByRole("USER");
     List<Role> roles = new ArrayList<>();
     roles.add(userRole);
-    if(passphrase.equalsIgnoreCase(user.getPassphrase())){
+    if(passphrase!= null && passphrase.equalsIgnoreCase(user.getPassphrase())){
       Role adminRole = roleRepository.findByRole("ADMIN");
       roles.add(adminRole);
     }
