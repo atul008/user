@@ -4,19 +4,25 @@ import com.cityfox.user.dao.RoleRepository;
 import com.cityfox.user.dao.UserRepository;
 import com.cityfox.user.model.Role;
 import com.cityfox.user.model.User;
+import java.util.ArrayList;
+import java.util.List;
+import javax.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.HashSet;
 
 @Service
+@ConfigurationProperties(prefix = "user")
 public class UserService {
 
   private UserRepository userRepository;
   private RoleRepository roleRepository;
   private BCryptPasswordEncoder bCryptPasswordEncoder;
+  @NotBlank
+  private String passphrase;
 
   @Autowired
   public UserService(UserRepository userRepository,
@@ -38,9 +44,18 @@ public class UserService {
   public User saveUser(User user) {
     user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
     user.setActive(true);
-    Role userRole = roleRepository.findByRole("ADMIN");
-    user.setRoles(new HashSet<Role>(Arrays.asList(userRole)));
+    Role userRole = roleRepository.findByRole("USER");
+    List<Role> roles = new ArrayList<>();
+    roles.add(userRole);
+    if(passphrase.equalsIgnoreCase(user.getPassphrase())){
+      Role adminRole = roleRepository.findByRole("ADMIN");
+      roles.add(adminRole);
+    }
+    user.setRoles(new HashSet<Role>(roles));
     return userRepository.save(user);
   }
 
+  public void setPassphrase(String passphrase) {
+    this.passphrase = passphrase;
+  }
 }

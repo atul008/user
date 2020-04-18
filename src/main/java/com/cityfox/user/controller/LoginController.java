@@ -1,6 +1,9 @@
 package com.cityfox.user.controller;
 
+import com.cityfox.user.model.Role;
+import com.cityfox.user.model.Training;
 import com.cityfox.user.model.User;
+import com.cityfox.user.service.TrainingService;
 import com.cityfox.user.service.UserService;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,8 @@ public class LoginController {
 
   @Autowired
   private UserService userService;
+  @Autowired
+  private TrainingService trainingService;
 
   @RequestMapping(value={"/", "/login"}, method = RequestMethod.GET)
   public ModelAndView login(){
@@ -56,16 +61,24 @@ public class LoginController {
     return modelAndView;
   }
 
-  @RequestMapping(value="/admin/home", method = RequestMethod.GET)
+  @RequestMapping(value="/home", method = RequestMethod.GET)
   public ModelAndView home(){
     ModelAndView modelAndView = new ModelAndView();
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     User user = userService.findUserByUserName(auth.getName());
     modelAndView.addObject("userName", "Welcome " + user.getUserName() + "/" + user.getName() + " " + user.getLastName() + " (" + user.getEmail() + ")");
-    modelAndView.addObject("adminMessage","Content Available Only for Users with Admin Role");
-    modelAndView.setViewName("admin/home");
+    for (Role role : user.getRoles()) {
+      if("ADMIN".equalsIgnoreCase(role.getRole())){
+        modelAndView.addObject("adminMessage","Content Available Only for Users with Admin Role");
+        modelAndView.setViewName("admin/home");
+        modelAndView.addObject("allTrainings", trainingService.getAllTraining());
+        modelAndView.addObject("training", new Training());
+        return modelAndView;
+      }
+    }
+    modelAndView.addObject("message","Content Available Only for Users with USER Role");
+    modelAndView.setViewName("home");
     return modelAndView;
   }
-
 
 }

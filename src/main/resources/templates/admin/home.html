@@ -18,19 +18,82 @@
             type="Submit">Logout
     </button>
   </form>
-
   <div class="panel-group" style="margin-top:40px">
     <div class="panel panel-primary">
       <div class="panel-heading">
         <span th:utext="${userName}"></span>
       </div>
       <div class="panel-body">
-        <img th:src="@{/images/beer.jpg}" class="img-responsive center-block" width="400" height="400"
-             alt="Beer"/>
       </div>
       <p class="admin-message-text text-center" th:utext="${adminMessage}"></p>
     </div>
   </div>
+  <div class="panel-group" style="margin-top:40px">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <span th:utext="Trainings"></span>
+      </div>
+      <table>
+        <thead>
+        <tr>
+          <th> Name  </th>
+          <th> Duration </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${allTrainings.empty}">
+          <td colspan="2"> No Trainings Available </td>
+        </tr>
+        <tr th:each="training : ${allTrainings}">
+          <td><span th:text="${training.name}"> Title </span></td>
+          <td></td>
+          <td><span th:text="${training.duration}"> Author </span></td>
+        </tr>
+        </tbody>
+      </table>
+
+
+    </div>
+  </div>
+
+  <form action="#"
+        th:action="@{/training}"
+        th:object="${training}"
+        method="post" id="add_training">
+
+    <label for="name">Name</label>
+    <input type="text" th:field="*{name}" id="name" placeholder="Name">
+    <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+
+    <label for="name">Duration</label>
+    <input type="text" th:field="*{duration}" id="email" placeholder="Duration in Days">
+    <span th:if="${#fields.hasErrors('duration')}" th:errors="*{duration}"></span>
+
+    <input type="submit" value="Add training">
+  </form>
+
+  <script>
+    // this is the id of the form
+    $("#add_training").submit(function(e) {
+
+      e.preventDefault(); // avoid to execute the actual submit of the form.
+
+      var form = $(this);
+      var url = form.attr('action');
+
+      $.ajax({
+        type: "POST",
+        url: "/training",
+        data: form.serialize(),
+        success: function(data)
+        {
+          alert("Training added successfully :D");
+        }
+      });
+
+
+    });
+  </script>
 
 </div>
 </body>
